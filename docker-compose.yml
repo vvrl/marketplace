@@ -1,0 +1,29 @@
+services:
+  app:
+    container_name: market-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+  db:
+    image: postgres:16-alpine
+    container_name: market-psql
+    environment:
+      POSTGRES_DB: market_db
+      POSTGRES_USER: market_user
+      POSTGRES_PASSWORD: market_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    name: my-network
