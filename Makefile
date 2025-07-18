@@ -8,4 +8,4 @@ stop:
 	docker-compose stop
 
 db:
-	docker exec -it auth-psql psql auth_user -d auth_db
+	docker exec -it market-psql psql market_user -d market_db
