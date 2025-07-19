@@ -8,12 +8,6 @@ import (
 
 var Logger = logrus.New()
 
-// func NewLogger() error {
-// 	Logger = logrus.New()
-
-// 	return nil
-// }
-
 func ConfigureLogger(logLevel string) error {
 	level, err := logrus.ParseLevel(logLevel)
 	if err != nil {
