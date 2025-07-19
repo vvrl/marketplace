@@ -5,13 +5,14 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
       - my-network
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: market-psql
     environment:
       POSTGRES_DB: market_db
@@ -23,7 +24,13 @@ services:
       - ./data:/var/lib/postgresql/data
     networks:
       - my-network
-
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "market_user", "-d", "market_db"]
+      interval: 2s
+      start_period: 10s
+      timeout: 5s
+      retries: 5
+    
 networks:
   my-network:
     name: my-network

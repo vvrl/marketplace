@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24.4-alpine AS builder
 
 RUN apk --no-cache add make gcc musl-dev
 
@@ -15,8 +15,7 @@ FROM alpine
 
 COPY --from=builder /app/bin/marketplace /
 COPY configs/config.yaml configs/config.yaml
-COPY internal/migrations internal/migrations
-COPY .env /
+# COPY internal/migrations internal/migrations
 
 
 CMD ["/marketplace"]
