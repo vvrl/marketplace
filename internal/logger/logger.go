@@ -2,22 +2,23 @@ package logger
 
 import (
 	"log"
-	"marketplace/internal/config"
 
 	"github.com/sirupsen/logrus"
 )
 
-var Logger *logrus.Logger
+var Logger = logrus.New()
 
-func NewLogger(cfg *config.Config) error {
-	tempLogger := logrus.New()
+// func NewLogger() error {
+// 	Logger = logrus.New()
 
-	level, err := logrus.ParseLevel(cfg.Logger.Level)
+// 	return nil
+// }
+
+func ConfigureLogger(logLevel string) error {
+	level, err := logrus.ParseLevel(logLevel)
 	if err != nil {
 		log.Fatal(err)
 	}
-	tempLogger.SetLevel(level)
-
-	Logger = tempLogger
+	Logger.SetLevel(level)
 	return nil
 }
