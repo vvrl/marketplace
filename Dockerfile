@@ -15,7 +15,7 @@ FROM alpine
 
 COPY --from=builder /app/bin/marketplace /
 COPY configs/config.yaml configs/config.yaml
-# COPY internal/migrations internal/migrations
+COPY internal/db/migrations internal/db/migrations
 
 
 CMD ["/marketplace"]

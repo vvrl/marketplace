@@ -2,11 +2,12 @@ package app
 
 import (
 	"marketplace/internal/config"
+	"marketplace/internal/db"
 	"marketplace/internal/handlers"
 	"marketplace/internal/logger"
-	"marketplace/internal/storage"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pressly/goose/v3"
 )
 
 type App struct {
@@ -24,11 +25,16 @@ func (a *App) Run() error {
 	cfg := config.NewConfig()
 	logger.ConfigureLogger(cfg.Logger.Level)
 
-	_, err := storage.NewDatabase(cfg)
+	database, err := db.NewDatabase(cfg)
 	if err != nil {
 		logger.Logger.Fatal(err)
 	}
 	logger.Logger.Info("database successfully started")
+
+	if err := goose.Up(database, "internal/db/migrations"); err != nil {
+		logger.Logger.Fatalf("migrations error: %v", err)
+	}
+	logger.Logger.Info("migrations added successfully")
 
 	e := echo.New()
 
