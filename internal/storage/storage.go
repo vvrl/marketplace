@@ -4,14 +4,14 @@ import "database/sql"
 
 type Storage struct {
 	DB   *sql.DB
-	User *userStorage
-	Ad   *adStorage
+	User UserStorage
+	Ad   AdStorage
 }
 
-func New(db *sql.DB) *Storage {
+func NewStorage(db *sql.DB) *Storage {
 	return &Storage{
 		DB:   db,
-		User: &userStorage{db},
-		Ad:   &adStorage{db},
+		User: NewUserStorage(db),
+		Ad:   NewAdStorage(db),
 	}
 }

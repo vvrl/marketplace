@@ -5,6 +5,8 @@ import (
 	"marketplace/internal/db"
 	"marketplace/internal/handlers"
 	"marketplace/internal/logger"
+	"marketplace/internal/services"
+	"marketplace/internal/storage"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pressly/goose/v3"
@@ -38,7 +40,11 @@ func (a *App) Run() error {
 
 	e := echo.New()
 
-	handlers.SetAPI(e)
+	store := storage.NewStorage(database)
+	ss := services.NewServices(store)
+	h := handlers.NewHandlers(ss)
+
+	h.SetAPI(e)
 	e.Logger.Fatal(e.Start(cfg.Server.Port))
 
 	logger.Logger.Infof("server successfully started on %s port", cfg.Server.Port)

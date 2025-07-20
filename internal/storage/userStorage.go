@@ -18,18 +18,22 @@ type (
 	}
 
 	userStorage struct {
-		*sql.DB
+		db *sql.DB
 	}
 )
+
+func NewUserStorage(db *sql.DB) UserStorage {
+	return &userStorage{db: db}
+}
 
 func (s *userStorage) CreateUser(ctx context.Context, login, password string) (*models.User, error) {
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := "INSERT INTO users (login, hash_password) VALUES ($1, $2) RETURNING id"
-	var id int64
+	var id int
 
-	err := s.QueryRowContext(ctxWithTimeout, query, login, password).Scan(&id)
+	err := s.db.QueryRowContext(ctxWithTimeout, query, login, password).Scan(&id)
 	if err != nil {
 		logger.Logger.Errorf("create user error: %v", err)
 		return nil, err
@@ -60,7 +64,7 @@ func (s *userStorage) GetUserByLogin(ctx context.Context, login string) (*models
 	var user models.User
 	query := "SELECT id, login, password FROM users WHERE login = $1"
 
-	err = s.QueryRowContext(ctxWithTimeout, query, login).Scan(&user.ID, &user.Login, &user.HashPassword)
+	err = s.db.QueryRowContext(ctxWithTimeout, query, login).Scan(&user.ID, &user.Login, &user.HashPassword)
 	if err != nil {
 		logger.Logger.Errorf("get user by email error: %v", err)
 		return nil, err
@@ -76,7 +80,7 @@ func (s *userStorage) IsExists(ctx context.Context, login string) (bool, error) 
 	defer cancel()
 
 	var isExists bool
-	err := s.QueryRowContext(ctxWithTimeout, query, login).Scan(&isExists)
+	err := s.db.QueryRowContext(ctxWithTimeout, query, login).Scan(&isExists)
 	if err != nil {
 		logger.Logger.Errorf("exists check error: %v", err)
 		return false, err

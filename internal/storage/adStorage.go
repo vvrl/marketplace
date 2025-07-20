@@ -15,11 +15,15 @@ type (
 	}
 
 	adStorage struct {
-		*sql.DB
+		db *sql.DB
 	}
 )
 
-func (s *adStorage) CreateAdvertisement(ctx context.Context, title, text, imageURL string, price float64, userID int64) (*models.Advertisement, error) {
+func NewAdStorage(db *sql.DB) AdStorage {
+	return &adStorage{db: db}
+}
+
+func (s *adStorage) CreateAdvertisement(ctx context.Context, title, text, imageURL string, price float64, userID int) (*models.Advertisement, error) {
 	query := `
 	INSERT INTO ads (title, text, image_url, price, user_id)
 	VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`
@@ -35,7 +39,7 @@ func (s *adStorage) CreateAdvertisement(ctx context.Context, title, text, imageU
 		AuthorID: userID,
 	}
 
-	err := s.QueryRowContext(ctxWithTimeout, query, title, text, imageURL, price, userID).Scan(&ad.ID, &ad.CreatedAt)
+	err := s.db.QueryRowContext(ctxWithTimeout, query, title, text, imageURL, price, userID).Scan(&ad.ID, &ad.CreatedAt)
 	if err != nil {
 		logger.Logger.Errorf("create advertisement error: %v", err)
 		return nil, err
@@ -61,7 +65,7 @@ func (s *adStorage) GetAdList(ctx context.Context, params AdsParams) ([]models.A
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	rows, err := s.QueryContext(ctxWithTimeout, query,
+	rows, err := s.db.QueryContext(ctxWithTimeout, query,
 		params.MinPrice,
 		params.MaxPrice,
 		params.Order,
