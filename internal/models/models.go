@@ -16,5 +16,6 @@ type Advertisement struct {
 	ImageURL  string    `json:"image_url"`
 	Price     float64   `json:"price"`
 	AuthorID  int64     `json:"author_id"`
+	IsMine    bool      `json:"is_mine"`
 	CreatedAt time.Time `json:"created_at"`
 }
