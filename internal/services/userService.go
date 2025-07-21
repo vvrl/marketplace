@@ -32,7 +32,7 @@ func (s *userService) Register(ctx context.Context, login, password string) (*mo
 		return nil, err
 	}
 	if exists {
-		textErr := fmt.Sprintf("user with login: %s alredy exists", login)
+		textErr := fmt.Sprintf("user with login: \"%s\" alredy exists", login)
 		return nil, errors.New(textErr)
 	}
 

@@ -30,10 +30,13 @@ func (s *userStorage) CreateUser(ctx context.Context, login, password string) (*
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO users (login, hash_password) VALUES ($1, $2) RETURNING id"
-	var id int
+	query := "INSERT INTO users (login, hash_password) VALUES ($1, $2) RETURNING id, created_at"
+	var (
+		id        int
+		createdAt time.Time
+	)
 
-	err := s.db.QueryRowContext(ctxWithTimeout, query, login, password).Scan(&id)
+	err := s.db.QueryRowContext(ctxWithTimeout, query, login, password).Scan(&id, &createdAt)
 	if err != nil {
 		logger.Logger.Errorf("create user error: %v", err)
 		return nil, err
@@ -43,6 +46,7 @@ func (s *userStorage) CreateUser(ctx context.Context, login, password string) (*
 		ID:           id,
 		Login:        login,
 		HashPassword: password,
+		CreatedAt:    createdAt,
 	}, nil
 }
 

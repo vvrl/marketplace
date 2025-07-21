@@ -25,11 +25,11 @@ services:
     networks:
       - my-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "market_user", "-d", "market_db"]
-      interval: 2s
-      start_period: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U market_user -d market_db"]
+      interval: 5s
+      start_period: 15s
+      timeout: 10s
+      retries: 20
     
 networks:
   my-network:

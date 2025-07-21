@@ -28,15 +28,24 @@ func NewDatabase(cfg *config.Config) (*sql.DB, error) {
 		logger.Logger.Fatalf("failed to parse config for pgx: %v", err)
 	}
 
-	db := stdlib.OpenDB(*dbConfig)
+	var lastErr error
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	for i := 0; i < cfg.Database.MaxAttempts; i++ {
 
-	if err := db.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("unable to connect to database: %w", err)
+		db := stdlib.OpenDB(*dbConfig)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := db.PingContext(ctx); err != nil {
+			lastErr = err
+			logger.Logger.Warnf("database connection attempt %d/%d failed: %v", i+1, cfg.Database.MaxAttempts, err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		return db, nil
 	}
 
-	return db, nil
+	return nil, fmt.Errorf("unable to connect to database: %w", lastErr)
 
 }

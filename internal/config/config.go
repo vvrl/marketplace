@@ -17,11 +17,12 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Dbname   string `yaml:"dbname"`
+	Host        string `yaml:"host"`
+	Port        int    `yaml:"port"`
+	User        string `yaml:"user"`
+	Password    string `yaml:"password"`
+	Dbname      string `yaml:"dbname"`
+	MaxAttempts int    `yaml:"maxAttempts"`
 }
 
 type LoggerConfig struct {

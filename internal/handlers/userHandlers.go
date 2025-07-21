@@ -24,13 +24,14 @@ func NewUserHandler(s services.UserService) *userHandler {
 	return &userHandler{service: s}
 }
 
-func (h *userHandler) Register(c echo.Context) error {
-	type RegisterRequest struct {
-		Login    string `json:"login" validate:"required"`
-		Password string `json:"password" validate:"required"`
-	}
+type UserRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
 
-	var req RegisterRequest
+func (h *userHandler) Register(c echo.Context) error {
+
+	var req UserRequest
 
 	if err := c.Bind(&req); err != nil {
 		logger.Logger.Error("failed to bind register request body")
@@ -52,6 +53,13 @@ func (h *userHandler) Register(c echo.Context) error {
 }
 
 func (h *userHandler) Login(c echo.Context) error {
+
+	var req UserRequest
+
+	if err := c.Bind(&req); err != nil {
+		logger.Logger.Error("failed to bind login request body")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "login is done"})
 }
