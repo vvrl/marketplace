@@ -10,6 +10,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Logger   LoggerConfig
+	JWT      JwtConfig
 }
 
 type ServerConfig struct {
@@ -27,6 +28,11 @@ type DatabaseConfig struct {
 
 type LoggerConfig struct {
 	Level string `yaml:"level"`
+}
+
+type JwtConfig struct {
+	Key      string `yaml:"key"`
+	Lifetime int    `yaml:"lifetime"`
 }
 
 func NewConfig() *Config {

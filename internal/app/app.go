@@ -1,6 +1,7 @@
 package app
 
 import (
+	"marketplace/internal/auth"
 	"marketplace/internal/config"
 	"marketplace/internal/db"
 	"marketplace/internal/handlers"
@@ -41,7 +42,8 @@ func (a *App) Run() error {
 	e := echo.New()
 
 	store := storage.NewStorage(database)
-	ss := services.NewServices(store)
+	jwtUtils := auth.NewJWTProvider(cfg.JWT.Key, cfg.JWT.Lifetime)
+	ss := services.NewServices(store, jwtUtils)
 	h := handlers.NewHandlers(ss)
 
 	h.SetAPI(e)

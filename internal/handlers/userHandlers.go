@@ -5,6 +5,7 @@ import (
 	"marketplace/internal/models"
 	"marketplace/internal/services"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -46,6 +47,9 @@ func (h *userHandler) Register(c echo.Context) error {
 	var user *models.User
 	user, err := h.service.Register(c.Request().Context(), req.Login, req.Password)
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "password hashing error") {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
@@ -60,6 +64,15 @@ func (h *userHandler) Login(c echo.Context) error {
 		logger.Logger.Error("failed to bind login request body")
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
+	if req.Login == "" || req.Password == "" {
+		logger.Logger.Error("invalid login request")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "no login or password"})
+	}
 
-	return c.JSON(http.StatusOK, map[string]string{"status": "login is done"})
+	token, err := h.service.Login(c.Request().Context(), req.Login, req.Password)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }

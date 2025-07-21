@@ -16,6 +16,11 @@ func HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
+func ValidatePassword(hash, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err
+}
+
 func validateCredentials(login, password string) error {
 	if len(login) < 4 || len(login) > 32 {
 		return errors.New("login must be 4-32 characters")

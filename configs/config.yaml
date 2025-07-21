@@ -13,3 +13,7 @@ database:
   dbname: "market_db"
   maxAttempts: 20
 
+jwt:
+  key: "secret_key_for_marketplace"
+  lifetime: 5
+

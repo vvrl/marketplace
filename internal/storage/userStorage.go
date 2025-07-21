@@ -66,7 +66,7 @@ func (s *userStorage) GetUserByLogin(ctx context.Context, login string) (*models
 	defer cancel()
 
 	var user models.User
-	query := "SELECT id, login, password FROM users WHERE login = $1"
+	query := "SELECT id, login, hash_password FROM users WHERE login = $1"
 
 	err = s.db.QueryRowContext(ctxWithTimeout, query, login).Scan(&user.ID, &user.Login, &user.HashPassword)
 	if err != nil {
