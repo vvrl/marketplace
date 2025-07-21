@@ -13,7 +13,7 @@ import (
 type (
 	AdStorage interface {
 		CreateAdvertisement(ctx context.Context, ad *models.Advertisement) (*models.Advertisement, error)
-		GetAdList(ctx context.Context, params models.ForListAdsParams) ([]models.Advertisement, error)
+		GetAdList(ctx context.Context, params models.ForListAdsParams) ([]*models.Advertisement, error)
 	}
 
 	adStorage struct {
@@ -41,21 +41,19 @@ func (s *adStorage) CreateAdvertisement(ctx context.Context, ad *models.Advertis
 	return ad, nil
 }
 
-func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParams) ([]models.Advertisement, error) {
-	ads := make([]models.Advertisement, 0)
-
+func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParams) ([]*models.Advertisement, error) {
 	orderDirection := "ASC"
 	if strings.ToUpper(params.Direction) == "DESC" {
 		orderDirection = "DESC"
 	}
 
-	orderBy := "created_at"
-	if params.Order == "price" {
-		orderBy = "price"
+	orderBy := "a.created_at"
+	if params.Order == "a.price" {
+		orderBy = "a.price"
 	}
 
 	query := fmt.Sprintf(`
-	SELECT a.title, a.text, a.image_url, a.price, u.login AS author_login
+	SELECT a.id, a.title, a.text, a.image_url, a.price, u.id AS author_id
 	FROM ads a
 	JOIN users u ON a.user_id = u.id
 	WHERE a.price BETWEEN $1 AND $2
@@ -78,9 +76,12 @@ func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParam
 		return nil, err
 	}
 
+	ads := make([]*models.Advertisement, 0)
+
 	for rows.Next() {
-		var temp models.Advertisement
+		temp := &models.Advertisement{}
 		err = rows.Scan(
+			&temp.ID,
 			&temp.Title,
 			&temp.Text,
 			&temp.ImageURL,

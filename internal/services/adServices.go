@@ -10,7 +10,7 @@ import (
 type (
 	AdService interface {
 		PostAd(ctx context.Context, title, text, imageURL string, price float64, userID int) (*models.Advertisement, error)
-		GetAdList(ctx context.Context, params models.ForListAdsParams, userID int) ([]models.Advertisement, error)
+		GetAdList(ctx context.Context, params models.ForListAdsParams, userID int) ([]*models.Advertisement, error)
 	}
 
 	adService struct {
@@ -41,7 +41,7 @@ func (s *adService) PostAd(ctx context.Context, title, text, imageURL string, pr
 	return ad, nil
 }
 
-func (s *adService) GetAdList(ctx context.Context, params models.ForListAdsParams, userID int) ([]models.Advertisement, error) {
+func (s *adService) GetAdList(ctx context.Context, params models.ForListAdsParams, userID int) ([]*models.Advertisement, error) {
 	ads, err := s.storage.GetAdList(ctx, params)
 	if err != nil {
 		return nil, err
