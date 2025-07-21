@@ -41,11 +41,6 @@ func (s *userService) Register(ctx context.Context, login, password string) (*mo
 		return nil, errors.New(textErr)
 	}
 
-	if err = validateCredentials(login, password); err != nil {
-		logger.Logger.Errorf("invalid login or password: %v", err)
-		return nil, err
-	}
-
 	HashPassword, err := HashPassword(password)
 	if err != nil {
 		logger.Logger.Errorf("password hashing error: %v", err)

@@ -19,3 +19,12 @@ type Advertisement struct {
 	IsMine    bool      `json:"is_mine"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type ForListAdsParams struct {
+	MinPrice float64
+	MaxPrice float64
+	Order    string
+	Duration string
+	Page     int
+	Limit    int
+}

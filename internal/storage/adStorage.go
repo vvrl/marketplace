@@ -10,8 +10,8 @@ import (
 
 type (
 	AdStorage interface {
-		CreateAdvertisement(ctx context.Context, title, text, imageURL string, price float64, userID int) (*models.Advertisement, error)
-		GetAdList(ctx context.Context, params AdsParams) ([]models.Advertisement, error)
+		CreateAdvertisement(ctx context.Context, ad *models.Advertisement) (*models.Advertisement, error)
+		GetAdList(ctx context.Context, params models.ForListAdsParams) ([]models.Advertisement, error)
 	}
 
 	adStorage struct {
@@ -23,7 +23,7 @@ func NewAdStorage(db *sql.DB) AdStorage {
 	return &adStorage{db: db}
 }
 
-func (s *adStorage) CreateAdvertisement(ctx context.Context, title, text, imageURL string, price float64, userID int) (*models.Advertisement, error) {
+func (s *adStorage) CreateAdvertisement(ctx context.Context, ad *models.Advertisement) (*models.Advertisement, error) {
 	query := `
 	INSERT INTO ads (title, text, image_url, price, user_id)
 	VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`
@@ -31,24 +31,15 @@ func (s *adStorage) CreateAdvertisement(ctx context.Context, title, text, imageU
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	ad := &models.Advertisement{
-		Title:    title,
-		Text:     text,
-		ImageURL: imageURL,
-		Price:    price,
-		AuthorID: userID,
-	}
-
-	err := s.db.QueryRowContext(ctxWithTimeout, query, title, text, imageURL, price, userID).Scan(&ad.ID, &ad.CreatedAt)
+	err := s.db.QueryRowContext(ctxWithTimeout, query, ad.Title, ad.Text, ad.ImageURL, ad.Price, ad.AuthorID).Scan(&ad.ID, &ad.CreatedAt)
 	if err != nil {
-		logger.Logger.Errorf("create advertisement error: %v", err)
 		return nil, err
 	}
 
 	return ad, nil
 }
 
-func (s *adStorage) GetAdList(ctx context.Context, params AdsParams) ([]models.Advertisement, error) {
+func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParams) ([]models.Advertisement, error) {
 	ads := make([]models.Advertisement, 0)
 
 	query := `
