@@ -9,9 +9,18 @@ import (
 	"marketplace/internal/services"
 	"marketplace/internal/storage"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/pressly/goose/v3"
 )
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
 
 type App struct {
 	config *config.Config
@@ -40,13 +49,14 @@ func (a *App) Run() error {
 	logger.Logger.Info("migrations added successfully")
 
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
 
 	store := storage.NewStorage(database)
 	jwtUtils := auth.NewJWTProvider(cfg.JWT.Key, cfg.JWT.Lifetime)
 	ss := services.NewServices(store, jwtUtils)
 	h := handlers.NewHandlers(ss)
 
-	h.SetAPI(e)
+	h.SetAPI(e, &jwtUtils)
 	e.Logger.Fatal(e.Start(cfg.Server.Port))
 
 	logger.Logger.Infof("server successfully started on %s port", cfg.Server.Port)
