@@ -3,8 +3,10 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"marketplace/internal/logger"
 	"marketplace/internal/models"
+	"strings"
 	"time"
 )
 
@@ -42,16 +44,24 @@ func (s *adStorage) CreateAdvertisement(ctx context.Context, ad *models.Advertis
 func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParams) ([]models.Advertisement, error) {
 	ads := make([]models.Advertisement, 0)
 
-	query := `
+	orderDirection := "ASC"
+	if strings.ToUpper(params.Direction) == "DESC" {
+		orderDirection = "DESC"
+	}
+
+	orderBy := "created_at"
+	if params.Order == "price" {
+		orderBy = "price"
+	}
+
+	query := fmt.Sprintf(`
 	SELECT a.title, a.text, a.image_url, a.price, u.login AS author_login
 	FROM ads a
 	JOIN users u ON a.user_id = u.id
 	WHERE a.price BETWEEN $1 AND $2
-	ORDER_BY 
-		CASE WHEN $3 = 'price' THEN a.price ELSE a.created_at END 
-	$4
-	LIMIT $5 OFFSET $6
-	`
+	ORDER BY %s %s
+	LIMIT $3 OFFSET $4
+	`, orderBy, orderDirection)
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -59,8 +69,6 @@ func (s *adStorage) GetAdList(ctx context.Context, params models.ForListAdsParam
 	rows, err := s.db.QueryContext(ctxWithTimeout, query,
 		params.MinPrice,
 		params.MaxPrice,
-		params.Order,
-		params.Duration,
 		params.Limit,
 		(params.Page-1)*params.Limit,
 	)

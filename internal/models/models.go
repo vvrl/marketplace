@@ -21,10 +21,10 @@ type Advertisement struct {
 }
 
 type ForListAdsParams struct {
-	MinPrice float64
-	MaxPrice float64
-	Order    string
-	Duration string
-	Page     int
-	Limit    int
+	MinPrice  float64
+	MaxPrice  float64
+	Order     string
+	Direction string
+	Page      int
+	Limit     int
 }

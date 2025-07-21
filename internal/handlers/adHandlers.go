@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"marketplace/internal/logger"
+	"marketplace/internal/models"
 	"marketplace/internal/services"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -57,7 +59,23 @@ func (h *adHandler) PostAd(c echo.Context) error {
 }
 
 func (h *adHandler) GetAdList(c echo.Context) error {
-	return nil
+	params := models.ForListAdsParams{
+		MinPrice:  float64(parseQueryInt(c, "min", 0)),
+		MaxPrice:  float64(parseQueryInt(c, "max", 100)),
+		Order:     parseQueryString(c, "order", "date"),
+		Direction: parseQueryString(c, "direction", "desc"),
+		Page:      parseQueryInt(c, "page", 1),
+		Limit:     parseQueryInt(c, "limit", 10),
+	}
+	// валидация
+	userID, _ := c.Get("userID").(int)
+
+	ads, err := h.service.GetAdList(c.Request().Context(), params, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to get ads"})
+	}
+
+	return c.JSON(http.StatusOK, ads)
 }
 
 func isValidImageURL(imageURL string) bool {
@@ -67,4 +85,20 @@ func isValidImageURL(imageURL string) bool {
 	}
 	path := strings.ToLower(u.Path)
 	return strings.HasSuffix(path, ".jpg") || strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".png")
+}
+
+func parseQueryInt(c echo.Context, key string, defaultValue int) int {
+	value, err := strconv.Atoi(c.QueryParam(key))
+	if err != nil {
+		return defaultValue
+	}
+	return value
+}
+
+func parseQueryString(c echo.Context, key string, defaultValue string) string {
+	value := c.QueryParam(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
