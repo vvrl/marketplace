@@ -14,7 +14,7 @@ type PostAdRequest struct {
 	Title    string  `json:"title" validate:"required,min=5,max=100"`
 	Text     string  `json:"text" validate:"required,min=10,max=1000"`
 	ImageURL string  `json:"image_url" validate:"required,url"`
-	Price    float64 `json:"price" validate:"required,min=0.0,max=1000000000.0"`
+	Price    float64 `json:"price" validate:"required,gte=0.0,lte=1000000000.0"`
 }
 
 type adHandler struct {

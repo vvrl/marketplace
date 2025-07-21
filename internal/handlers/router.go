@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"marketplace/internal/auth"
+	"marketplace/internal/middlewares"
 	"marketplace/internal/services"
 
 	"github.com/labstack/echo/v4"
@@ -18,8 +20,8 @@ func NewHandlers(s *services.Services) *Handlers {
 	}
 }
 
-func (h *Handlers) SetAPI(e *echo.Echo) {
-	e.GET("/", HelloHandler)
+func (h *Handlers) SetAPI(e *echo.Echo, jwtUtils *auth.JWTProvider) {
+	e.Use(middlewares.JwtMiddleware(*jwtUtils))
 
 	// User methods
 	e.POST("/register", h.UserHandler.Register)
